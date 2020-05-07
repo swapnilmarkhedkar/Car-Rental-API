@@ -18,32 +18,15 @@ router.get('/date/:pickupDate/:dropDate', (req,res)=>{
     var fromDate = req.params.pickupDate;
     var toDate = req.params.dropDate;
 
-    Car.find().populate('')
-
-    // Booking.find().populate('carId')
-    // .exec((err, cars)=>{
-    //     if(err) throw err;
-    //     console.log(cars);
-    // });
-    // const freeCars = await Booking.aggregate([
-    //     {
-    //         $lookup:
-    //     }
-    // ]);
-
-
-    // var freeCars = [];
-    // asdf
-
     carList = [];
     Car.find().then((cars)=>{
         // Look through all cars and check if booked for that period
         for(var i=0; i<cars.length; i++){
             let car=cars[i];
-            // console.log(cars[i].id);
-            // Check if that car available in speicifed date range
-            query = {
-                id:car.id,
+            console.log(car.id);
+            // Check if that car is available in specified date range
+            var query = {
+                carId:car.id,
                 $or:[
                     {
                         pickupDate:{
@@ -68,54 +51,41 @@ router.get('/date/:pickupDate/:dropDate', (req,res)=>{
                 ]
             };
 
+            // Promise adds to list if condition is satisfied
             carList.push(new Promise (function(resolve, reject){
                 Booking.find(query, function(err,bookings){
-                    if(err) reject(err);
+                    if(err) reject(err); // Handle errro
 
                     if (bookings.length == 0){
                         resolve(car);
+                    }
+                    else{
+                        resolve();
                     }
                 });
             }));
         }
 
+        // Waits till all requests are satisfied
         Promise.all(carList).then(function(results){
-            res.send(results);
+            finalList= [];
+
+            // Add to list non-null elements
+            for(var i=0; i<results.length; i++){
+                if(results[i])
+                    finalList.push(results[i]);
+            }
+            res.send(finalList);
+
+        }).catch((e)=>{
+            res.status(400).send(e);
         });
     }).catch((e)=>{
         res.status(400).send(e);
     });
-    //         freeCars.push(new Promise(function(resolve,reject){
-    //             Booking.find(query, function(err,bookings){
 
-    //             })
-    //         }));
-    //         Booking.find(
-    //             query
-    //         ).then((bookings)=>{
-    //             // console.log(bookings);
-    //             if(bookings.length==0){
-    //                 // console.log('Car : ');
-    //                 // console.log('i : '+ i);
-    //                 // console.log(car);
-    //                 freeCars.push(car);
-
-    //                 console.log('FreeCars : '+ freeCars);
-
-    //             }
-    //         });
-    //         // .catch((e)=>{
-    //         //     return Promise.reject(e);
-    //         // });
-    //     }
-    //     return freeCars;
-    // }).then((freeCars)=>{
-    //     console.log('FreeCars : '+ freeCars);
-    //     res.send(JSON.stringify(freeCars));
-    // }).
-    // catch((e)=>{
-    //     res.status(400).send(e);
-    // });
+    // Alternative
+    // Use Car.populate('bookings'), however this would require a bookings array associated with each car
 });
 
 // GET car by ID
