@@ -54,23 +54,7 @@ var isBooked = (req,res,next)=>{
                 }
             }
         ]
-    // }).then((booking)=>{
-    //     console.log(booking);
-    //     if(booking.length == 0){
-    //         // Car not booked
-    //         next();
-    //     }
-
-    //     else{
-    //         // booked
-    //         return Promise.reject('Car booked for that period');
-    //     }
-    // }).catch((e)=>{
-    //     console.log('Here');
-    //     res.status(400).send(e);
-    // });
     }).then((booking)=>{
-        // console.log(booking);
         if(booking.length == 0){
             // Car not booked
             next();
@@ -79,9 +63,7 @@ var isBooked = (req,res,next)=>{
         else{
             // booked
             return Promise.reject('Car booked for that period');
-            // res.status(400).send('Car booked for that period');
         }
-    // });
     }).catch((e)=>{
         console.log('Here');
         res.status(400).send(e);
