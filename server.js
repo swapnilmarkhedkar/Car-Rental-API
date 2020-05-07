@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 
 // Database connection
 var {mongoose} = require('./db/mongoose');
-// var {Car} = require('./models/Car');
 
 // Middleware
 const app = express();
@@ -15,5 +14,7 @@ app.use(bodyParser.json());
 // Routes
 app.use('/', require('./routes/index'));
 app.use('/cars', require('./routes/cars'));
+app.use('/customers', require('./routes/customers'));
+app.use('/bookings', require('./routes/bookings'));
 
 app.listen(PORT, console.log(`Started server on Port ${PORT} `));

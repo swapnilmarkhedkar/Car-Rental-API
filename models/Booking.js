@@ -5,13 +5,21 @@ var Booking = mongoose.model('Booking', {
         type: mongoose.ObjectId,
         required: true
     },
-    userId: {
+    customerId: {
         type: mongoose.ObjectId,
         required: true
     },
     pickupDate:{
         type: Date,
-        required: true
+        required: true,
+        validate:{
+            validator: (d)=>{
+                if(d<Date.now())
+                    return false;
+                return true;
+            },
+            message: 'cannot book in the past'
+        }
     },
     dropDate:{
         type: Date,

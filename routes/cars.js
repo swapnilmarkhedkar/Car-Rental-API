@@ -3,7 +3,7 @@ const router = express.Router();
 const {Car} = require('../models/Car');
 var {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
 
-// Get all cars
+// GET all cars
 router.get('/', (req,res)=>{
     Car.find().then((cars)=>{
         res.send({cars}); // Kept as object instead of array for flexibilty. Thus allowing to send multiple entities in the future 
