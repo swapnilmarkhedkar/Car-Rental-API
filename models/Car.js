@@ -4,6 +4,7 @@ var Car = mongoose.model('Car', {
     vehicleNumber : {
         type: String,
         minlength: 6,
+        unique:true,
         required: true
     },
     modelName: {
