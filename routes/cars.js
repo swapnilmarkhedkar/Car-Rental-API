@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const utils = require('../utils/util');
+const middleware = require('../middleware/booking.middleware');
 
 const {Car} = require('../models/Car');
-const {Booking} = require('../models/Booking');
+const {Booking} = require('../models/Booking'); //@TODO: Possibly remove it
 const {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
 
 // GET all cars
@@ -113,36 +114,14 @@ router.post('/', (req,res)=>{
     });
 });
 
-// Middleware to check if booking exists for a particular car that day
-var isCarBooked = (req,res,next)=>{
-    var carId = req.params.id;
-    var query = utils.returnCurrentDateQuery(carId);
-    
-    Booking.find(query).then((booking)=>{
-        if(booking.length == 0){
-            // Car not booked
-            next();
-        }
-
-        else{
-            // booked
-            return Promise.reject('Car booked right now');
-        }
-    }).catch((e)=>{
-        console.log('Here');
-        res.status(400).send(e);
-    });
-};
-
 // Update car details
-router.patch('/:id', isCarBooked, (req,res)=>{
+router.patch('/:id', middleware.isCarBooked, (req,res)=>{
     var id = req.params.id;
 
     if(!ObjectID.isValid(id)){
         return res.status(404).send();
     }
 
-    // Check if Car is booked currently
     // @TODO: Use lodash to pick entities to update
     // @TODO: Change to findOneAndUpdate
     Car.findByIdAndUpdate(id, {$set: req.body}, {new:true})
@@ -159,7 +138,7 @@ router.patch('/:id', isCarBooked, (req,res)=>{
 });
 
 // DELETE car
-router.delete('/:id', isCarBooked, (req,res)=>{
+router.delete('/:id', middleware.isCarBooked, (req,res)=>{
     var id = req.params.id;
 
     if(!ObjectID.isValid(id)){

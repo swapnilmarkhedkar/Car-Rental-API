@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const {Booking} = require('../models/Booking');
 const utils = require('../utils/util');
+const middleware = require('../middleware/booking.middleware');
+
+const {Booking} = require('../models/Booking');
 var {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
 
 // GET all bookings
@@ -13,46 +15,11 @@ router.get('/', (req,res)=>{
     });
 });
 
-// Middleware to check if return date is before pickup date
-var isValidDate = (req,res,next)=>{
-    var fromDate = req.body.pickupDate;
-    var toDate = req.body.dropDate;
-
-    // @TODO: Change to Promise
-    if(fromDate>toDate) 
-        res.status(400).send('Cannot return car before picking it up');
-    else
-        next();
-};
-
-// Middleware to check if booking exists
-var isBooked = (req,res,next)=>{
-    var fromDate = req.body.pickupDate;
-    var toDate = req.body.dropDate;
-    var carId = req.body.carId;
-    var query = utils.returnDateQuery(carId,toDate,fromDate);
-    
-    Booking.find(query).then((booking)=>{
-        if(booking.length == 0){
-            // Car not booked
-            next();
-        }
-
-        else{
-            // booked
-            return Promise.reject('Car booked for that period');
-        }
-    }).catch((e)=>{
-        console.log('Here');
-        res.status(400).send(e);
-    });
-};
-
 // POST booking
-router.post('/', isValidDate, isBooked, (req,res)=>{
+router.post('/', middleware.isValidDate, middleware.isBooked, (req,res)=>{
 
-    // Check if customer exists
-    // Check if customer isn't booking for another customer
+    // @TODO: Check if customer exists
+    // @TODO: Check if customer isn't booking for another customer
 
     var booking = new Booking({
         carId: req.body.carId,
