@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const utils = require('../utils/util');
+
 const {Car} = require('../models/Car');
 const {Booking} = require('../models/Booking');
-const utils = require('../utils/util');
-var {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
+const {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
 
 // GET all cars
 router.get('/', (req,res)=>{
@@ -34,7 +35,7 @@ router.get('/date/:pickupDate/:dropDate', (req,res)=>{
             // Promise adds to list if condition is satisfied
             carList.push(new Promise (function(resolve, reject){
                 Booking.find(query, function(err,bookings){
-                    if(err) reject(err); // Handle errro
+                    if(err) reject(err); // Handle error
 
                     if (bookings.length == 0){
                         resolve(car);
@@ -68,6 +69,24 @@ router.get('/date/:pickupDate/:dropDate', (req,res)=>{
     // Use Car.populate('bookings'), however this would require a bookings array associated with each car
 });
 
+function isCurrCarBooked(car){
+    var query = utils.returnCurrentDateQuery(car.id);
+    return new Promise((resolve, reject)=>{
+        Booking.find(query, function (err, bookings){
+            if(err) reject(err); // Handle error
+
+            if (bookings.length == 0){
+                // Promise will resolve if currently not booked
+                resolve();
+            }
+            else{
+                // Promise will reject if currently booked
+                resolve();
+            }
+        });
+    });
+};
+
 // GET car by ID
 router.get('/:id', (req,res)=>{
     var id = req.params.id;
@@ -81,8 +100,19 @@ router.get('/:id', (req,res)=>{
             return res.status(404).send();
         }
         
-        res.send({car}); 
-
+        isCurrCarBooked(car).then(()=>{
+            // Promise resolved which means currently not booked
+            res.send({
+                car,
+                isBooked:false
+            });             
+        }).catch(()=>{
+            // Promise rejected and thus booked
+            res.send({
+                car,
+                isBooked:true
+            })
+        });
     }).catch((e)=>{
         res.status(400).send(e);
     });
@@ -104,14 +134,36 @@ router.post('/', (req,res)=>{
     });
 });
 
+// Middleware to check if booking exists for a particular car that day
+var isCarBooked = (req,res,next)=>{
+    var carId = req.params.id;
+    var query = utils.returnCurrentDateQuery(carId);
+    
+    Booking.find(query).then((booking)=>{
+        if(booking.length == 0){
+            // Car not booked
+            next();
+        }
+
+        else{
+            // booked
+            return Promise.reject('Car booked right now');
+        }
+    }).catch((e)=>{
+        console.log('Here');
+        res.status(400).send(e);
+    });
+};
+
 // Update car details
-router.patch('/:id', (req,res)=>{
+router.patch('/:id', isCarBooked, (req,res)=>{
     var id = req.params.id;
 
     if(!ObjectID.isValid(id)){
         return res.status(404).send();
     }
 
+    // Check if Car is booked currently
     // @TODO: Use lodash to pick entities to update
     // @TODO: Change to findOneAndUpdate
     Car.findByIdAndUpdate(id, {$set: req.body}, {new:true})
@@ -128,7 +180,7 @@ router.patch('/:id', (req,res)=>{
 });
 
 // DELETE car
-router.delete('/:id', (req,res)=>{
+router.delete('/:id', isCarBooked, (req,res)=>{
     var id = req.params.id;
 
     if(!ObjectID.isValid(id)){

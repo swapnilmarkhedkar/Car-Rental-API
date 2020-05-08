@@ -26,5 +26,20 @@ module.exports = {
             ]
         };
         return query;
+    },
+
+    returnCurrentDateQuery : function(carId){
+        // Assuming a car is booked for atleast a day
+        var currentDate = 1588928334217;
+        var query = {
+            carId:carId,
+            pickupDate:{
+                $lte: currentDate
+            },
+            dropDate: {
+                $gte: currentDate
+            }
+        };
+        return query;
     }
 }
