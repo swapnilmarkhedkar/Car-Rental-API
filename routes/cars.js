@@ -2,15 +2,42 @@ const express = require('express');
 const router = express.Router();
 const utils = require('../utils/util');
 const middleware = require('../middleware/booking.middleware');
+const carController = require('../controllers/cars.controller');
 
 const {Car} = require('../models/Car');
 const {Booking} = require('../models/Booking'); //@TODO: Possibly remove it
 const {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
 
 // GET all cars
-router.get('/', (req,res)=>{
-    Car.find().then((cars)=>{
-        res.send({cars}); // Kept as object instead of array for flexibilty. Thus allowing to send multiple entities in the future 
+router.get('/', carController.getAllCars);
+
+// GET car by ID
+router.get('/:id', (req,res)=>{
+    var id = req.params.id;
+
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send();
+    }
+
+    Car.findById(id).then( (car)=>{
+        if(!car){
+            return res.status(404).send();
+        }
+        
+        var query = utils.returnCurrentDateQuery(car.id);
+        utils.isCurrentCarBooked(query).then(()=>{
+            // Promise resolved which means currently not booked
+            res.send({
+                car,
+                isBooked:false
+            });             
+        }).catch(()=>{
+            // Promise rejected and thus booked
+            res.send({
+                car,
+                isBooked:true
+            })
+        });
     }).catch((e)=>{
         res.status(400).send(e);
     });
@@ -64,38 +91,6 @@ router.get('/date/:pickupDate/:dropDate', (req,res)=>{
 
     // Alternative
     // Use Car.populate('bookings'), however this would require a bookings array associated with each car
-});
-
-// GET car by ID
-router.get('/:id', (req,res)=>{
-    var id = req.params.id;
-
-    if(!ObjectID.isValid(id)){
-        return res.status(404).send();
-    }
-
-    Car.findById(id).then( (car)=>{
-        if(!car){
-            return res.status(404).send();
-        }
-        
-        var query = utils.returnCurrentDateQuery(car.id);
-        utils.isCurrCarBooked(query).then(()=>{
-            // Promise resolved which means currently not booked
-            res.send({
-                car,
-                isBooked:false
-            });             
-        }).catch(()=>{
-            // Promise rejected and thus booked
-            res.send({
-                car,
-                isBooked:true
-            })
-        });
-    }).catch((e)=>{
-        res.status(400).send(e);
-    });
 });
 
 // POST car

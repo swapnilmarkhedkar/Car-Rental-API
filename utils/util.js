@@ -49,7 +49,7 @@ module.exports = {
         return new Promise((resolve, reject)=>{
             Booking.find(query, function (err, bookings){
                 if(err) reject(err); // Handle error
-    
+                
                 if (bookings.length == 0){
                     // Promise will resolve if currently not booked
                     resolve();
