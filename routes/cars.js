@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const {Car} = require('../models/Car');
 const {Booking} = require('../models/Booking');
+const utils = require('../utils/util');
 var {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
 
 // GET all cars
 router.get('/', (req,res)=>{
     Car.find().then((cars)=>{
         res.send({cars}); // Kept as object instead of array for flexibilty. Thus allowing to send multiple entities in the future 
-    }, (e)=>{
+    }).catch((e)=>{
         res.status(400).send(e);
     });
 });
@@ -17,39 +18,18 @@ router.get('/', (req,res)=>{
 router.get('/date/:pickupDate/:dropDate', (req,res)=>{
     var fromDate = req.params.pickupDate;
     var toDate = req.params.dropDate;
+    // @TODO: Validate dates
 
     carList = [];
-    Car.find().then((cars)=>{
+    Car.find(req.query).then((cars)=>{
+        // req.query is used to add additional query parameter like ?seatingCapacity=5&rent=1000
+
         // Look through all cars and check if booked for that period
         for(var i=0; i<cars.length; i++){
             let car=cars[i];
-            console.log(car.id);
             // Check if that car is available in specified date range
-            var query = {
-                carId:car.id,
-                $or:[
-                    {
-                        pickupDate:{
-                            $lte: toDate,
-                            $gte: fromDate
-                        }
-                    },
-                    {
-                        dropDate:{
-                            $lte: toDate,
-                            $gte: fromDate
-                        }
-                    },
-                    {
-                        pickupDate:{
-                            $lte:fromDate
-                        },
-                        dropDate:{
-                            $gte:toDate
-                        }
-                    }
-                ]
-            };
+          
+            var query = utils.returnDateQuery(car,toDate,fromDate);
 
             // Promise adds to list if condition is satisfied
             carList.push(new Promise (function(resolve, reject){
@@ -102,7 +82,7 @@ router.get('/:id', (req,res)=>{
         }
         
         res.send({car}); 
-        
+
     }).catch((e)=>{
         res.status(400).send(e);
     });
