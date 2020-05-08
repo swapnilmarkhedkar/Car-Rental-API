@@ -36,7 +36,6 @@ module.exports = {
             return res.status(404).send();
         }
     
-        // @TODO: Change to findOneAndUpdate
         Booking.findByIdAndDelete(id).then((booking)=>{
             if(!booking){
                 return res.status(404).send();

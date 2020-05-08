@@ -114,7 +114,7 @@ module.exports = {
         }
     
         // @TODO: Use lodash to pick entities to update
-        // @TODO: Change to findOneAndUpdate
+        
         Car.findByIdAndUpdate(id, {$set: req.body}, {new:true})
         .then( (car)=>{
             if(!car){
@@ -135,7 +135,6 @@ module.exports = {
             return res.status(404).send();
         }
     
-        // @TODO: Change to findOneAndUpdate
         Car.findByIdAndDelete(id).then((car)=>{
             if(!car){
                 return res.status(404).send();

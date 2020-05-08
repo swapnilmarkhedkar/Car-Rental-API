@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
-
+const middleware = require('../middleware/admin.middleware');
 const {Admin} = require('../models/Admin');
 
 // GET all admins
-router.get('/', (req,res)=>{
+router.get('/', middleware.authenticate, (req,res)=>{
     Admin.find().then( (admins)=>{
         res.send({admins});
     }).catch((e)=>{
@@ -13,25 +13,8 @@ router.get('/', (req,res)=>{
     });
 });
 
-// Middleware to authenticate admin
-var authenticate = (req,res,next) =>{
-    var token = req.header('x-auth');
-
-    Admin.findByToken(token).then((admin)=>{
-        if(!admin){
-            return Promise.reject();
-        }
-
-        req.admin = admin;
-        req.token = token;
-        next();
-    }).catch((e)=>{
-        res.status(401).send(e);
-    });
-};
-
 // GET admin
-router.get('/me', authenticate, (req,res)=>{
+router.get('/me', middleware.authenticate, (req,res)=>{
     res.send(req.admin);
 });
 
@@ -63,7 +46,7 @@ router.post('/login', (req,res)=>{
 });
 
 // Logout admin (delete token)
-router.delete('/me/token', authenticate, (req,res)=>{
+router.delete('/me/token', middleware.authenticate, (req,res)=>{
     req.admin.removeToken(req.token).then(()=>{
         res.status(200).send();
     }, ()=>{
