@@ -1,12 +1,16 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 var Customer = mongoose.model('Customer', {
     email:{
         type: String,
         required: true,
         trim: true,
-        unique:true
-        // TODO: Add Validation
+        unique:true,
+        validate:{
+            validator: validator.isEmail,
+            message: '{VALUE} is not a valid email'
+        }
     },
     name : {
         type: String,

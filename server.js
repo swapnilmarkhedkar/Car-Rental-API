@@ -16,5 +16,6 @@ app.use('/', require('./routes/index'));
 app.use('/cars', require('./routes/cars'));
 app.use('/customers', require('./routes/customers'));
 app.use('/bookings', require('./routes/bookings'));
+app.use('/admin', require('./routes/admin'));
 
 app.listen(PORT, console.log(`Started server on Port ${PORT} `));
