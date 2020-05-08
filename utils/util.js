@@ -1,7 +1,7 @@
 module.exports = {
-    returnDateQuery : function(car,toDate,fromDate){
+    returnDateQuery : function(carId,toDate,fromDate){
         var query = {
-            carId:car.id,
+            carId:carId,
             $or:[
                 {
                     pickupDate:{

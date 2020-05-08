@@ -29,7 +29,7 @@ router.get('/date/:pickupDate/:dropDate', (req,res)=>{
             let car=cars[i];
             // Check if that car is available in specified date range
           
-            var query = utils.returnDateQuery(car,toDate,fromDate);
+            var query = utils.returnDateQuery(car.id,toDate,fromDate);
 
             // Promise adds to list if condition is satisfied
             carList.push(new Promise (function(resolve, reject){

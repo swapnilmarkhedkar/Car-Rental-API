@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {Booking} = require('../models/Booking');
+const utils = require('../utils/util');
 var {ObjectID} = require('mongodb'); // ObjectID = require('mongodb).ObjectID
 
 // GET all bookings
@@ -29,32 +30,9 @@ var isBooked = (req,res,next)=>{
     var fromDate = req.body.pickupDate;
     var toDate = req.body.dropDate;
     var carId = req.body.carId;
-
-    Booking.find({
-        carId: carId,
-        $or:[ 
-            {
-                pickupDate:{
-                    $lte: toDate,
-                    $gte: fromDate
-                }
-            },
-            {
-                dropDate:{
-                    $lte: toDate,
-                    $gte: fromDate
-                }
-            },
-            {
-                pickupDate:{
-                    $lte:fromDate
-                },
-                dropDate:{
-                    $gte:toDate
-                }
-            }
-        ]
-    }).then((booking)=>{
+    var query = utils.returnDateQuery(carId,toDate,fromDate);
+    
+    Booking.find(query).then((booking)=>{
         if(booking.length == 0){
             // Car not booked
             next();
