@@ -1,3 +1,5 @@
+const {Booking} = require('../models/Booking');
+
 module.exports = {
     returnDateQuery : function(carId,toDate,fromDate){
         var query = {
@@ -41,5 +43,22 @@ module.exports = {
             }
         };
         return query;
+    },
+
+    isCurrentCarBooked: function(query){
+        return new Promise((resolve, reject)=>{
+            Booking.find(query, function (err, bookings){
+                if(err) reject(err); // Handle error
+    
+                if (bookings.length == 0){
+                    // Promise will resolve if currently not booked
+                    resolve();
+                }
+                else{
+                    // Promise will reject if currently booked
+                    resolve();
+                }
+            });
+        });
     }
 }
