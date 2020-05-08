@@ -92,9 +92,8 @@ AdminSchema.statics.findByCredentials = function(email, password){
         if(!admin){
             return Promise.reject();
         }
-
         return new Promise((resolve, reject)=>{
-            bcrypt.compare(password, user.password, (err,res)=>{
+            bcrypt.compare(password, admin.password, (err,res)=>{
                 if(res){
                     resolve(admin);
                 }else{

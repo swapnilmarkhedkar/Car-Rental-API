@@ -53,8 +53,10 @@ router.post('/', (req,res)=>{
 router.post('/login', (req,res)=>{
     var body = _.pick(req.body, ['email', 'password']);
 
-    Admin.findByCredential(body.email, body.password).then((admin)=>{
-        res.send(admin);
+    Admin.findByCredentials(body.email, body.password).then((admin)=>{
+        return admin.generateAuthToken().then((token)=>{
+            res.header('x-auth',token).send(admin);
+        });
     }).catch((e)=>{
         res.status(400).send(e);
     });
