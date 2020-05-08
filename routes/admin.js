@@ -62,4 +62,13 @@ router.post('/login', (req,res)=>{
     });
 });
 
+// Logout admin (delete token)
+router.delete('/me/token', authenticate, (req,res)=>{
+    req.admin.removeToken(req.token).then(()=>{
+        res.status(200).send();
+    }, ()=>{
+        res.status(400).send();
+    });
+});
+
 module.exports=router;

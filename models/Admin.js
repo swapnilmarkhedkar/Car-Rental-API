@@ -66,6 +66,16 @@ AdminSchema.methods.generateAuthToken = function(){
     })
 };
 
+AdminSchema.methods.removeToken = function(token){
+    var admin = this;
+
+    return admin.update({
+        $pull: {
+            tokens:{token}
+        }
+    });
+};
+
 // statics for Models
 AdminSchema.statics.findByToken = function(token){
     // Function to find admin by token
