@@ -29,7 +29,7 @@ var isValidDate = (req,res,next)=>{
 
     // @TODO: Change to Promise
     if(fromDate>toDate) 
-        res.status(400).send('Cannot return car before picking it up');
+        res.status(400).send('Cannot drop car before picking it up');
     else
         next();
 };
