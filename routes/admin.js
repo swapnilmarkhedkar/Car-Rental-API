@@ -1,17 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const _ = require('lodash');
 const middleware = require('../middleware/admin.middleware');
-const {Admin} = require('../models/Admin');
+const adminController = require('../controllers/admin.controller');
 
 // GET all admins
-router.get('/', middleware.authenticate, (req,res)=>{
-    Admin.find().then( (admins)=>{
-        res.send({admins});
-    }).catch((e)=>{
-        res.status(400).send(e);
-    });
-});
+router.get('/', middleware.authenticate, adminController.getAllAdmins);
 
 // GET admin
 router.get('/me', middleware.authenticate, (req,res)=>{
@@ -19,39 +12,12 @@ router.get('/me', middleware.authenticate, (req,res)=>{
 });
 
 // POST admin
-router.post('/', (req,res)=>{
-    var body = _.pick(req.body, ['email', 'name', 'password']);
-    var admin = new Admin(body);
-
-    admin.save().then(()=>{
-        return admin.generateAuthToken(); // Promise is returned
-    }).then((token)=>{
-        res.header('x-auth',token).send(admin);
-    }).catch((e)=>{
-        res.status(400).send(e);
-    });
-});
+router.post('/', adminController.postAdmin);
 
 // Login admin (generate auth token for login)
-router.post('/login', (req,res)=>{
-    var body = _.pick(req.body, ['email', 'password']);
-
-    Admin.findByCredentials(body.email, body.password).then((admin)=>{
-        return admin.generateAuthToken().then((token)=>{
-            res.header('x-auth',token).send(admin);
-        });
-    }).catch((e)=>{
-        res.status(400).send(e);
-    });
-});
+router.post('/login', adminController.loginAdmin);
 
 // Logout admin (delete token)
-router.delete('/me/token', middleware.authenticate, (req,res)=>{
-    req.admin.removeToken(req.token).then(()=>{
-        res.status(200).send();
-    }, ()=>{
-        res.status(400).send();
-    });
-});
+router.delete('/me/token', middleware.authenticate, adminController.logoutAdmin);
 
 module.exports=router;
