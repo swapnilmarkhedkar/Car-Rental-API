@@ -1,4 +1,5 @@
 const {Booking} = require('../models/Booking');
+const utils = require('../utils/util');
 
 // Middleware to check if booking exists for a particular car that day
 var isCarBooked = (req,res,next)=>{
