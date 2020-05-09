@@ -46,10 +46,12 @@ module.exports = {
     },
 
     isCurrentCarBooked: function(query){
+        console.log('Query : '+ query);
         return new Promise((resolve, reject)=>{
             Booking.find(query, function (err, bookings){
                 if(err) reject(err); // Handle error
                 
+                console.log('Bookings : '+ bookings);
                 if (bookings.length == 0){
                     // Promise will resolve if currently not booked
                     resolve();
