@@ -5,6 +5,7 @@ const _ = require('lodash');
 module.exports = {
     pickIdAndEmail: function(){
         // Function to only pick id and email to respond with
+        // If this wasn't used, res.send() would have sent back unneccessary information
         var admin = this;
         var adminObject = admin.toObject();
     
@@ -19,7 +20,7 @@ module.exports = {
     
         var token = jwt.sign({
             _id: admin._id.toHexString(), // Generating token based on ID of admin
-            access
+            access // access: access (es6 destructuring)
         }, 'secret123').toString();
     
         admin.tokens = admin.tokens.concat([{access, token}]);
@@ -46,7 +47,9 @@ module.exports = {
     
         try{
             decoded=jwt.verify(token, 'secret123');
+            // Only if token is unaltered AND secret is correct, it is verified successfully
         }catch(e){
+            // otherwise an error is thrown
             return Promise.reject();
         }
     
@@ -82,14 +85,17 @@ module.exports = {
         var admin = this;
     
         if(admin.isModified('password')){
+            // conditional update to hash the password only if password was changed 
             bcrypt.genSalt(10, (err, salt) =>{
+                // 10 rounds, can be set higher for added security
+                // salt is generated and passed in callback function
                 bcrypt.hash(admin.password, salt, (err,hash)=>{
                     admin.password = hash;
                     next();
                 });
             });
         }else{
-            // if password is hashed and salted once then go ahead
+            // no modifications in password, thus password is already hashed and salted once
             next();
         }
     }

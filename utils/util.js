@@ -32,7 +32,7 @@ module.exports = {
 
     returnCurrentDateQuery : function(carId){
         // Assuming a car is booked for atleast a day
-        var currentDate = 1588928334217;
+        var currentDate = Date.now();
         var query = {
             carId:carId,
             pickupDate:{

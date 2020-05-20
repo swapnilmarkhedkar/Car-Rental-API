@@ -37,7 +37,7 @@ var AdminSchema = new mongoose.Schema({
 });
 
 // methods for instance
-AdminSchema.methods.toJSON = adminSchemaController.pickIdAndEmail;
+AdminSchema.methods.toJSON = adminSchemaController.pickIdAndEmail; //Override toJSON method
 
 AdminSchema.methods.generateAuthToken = adminSchemaController.generateAuthToken;
 
