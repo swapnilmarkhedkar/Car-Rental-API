@@ -1,4 +1,4 @@
-# Car-Rental-White-Panda
+# Car-Rental-API
 Node.js app for renting cars
 
 Live : https://floating-retreat-50476.herokuapp.com/ 
